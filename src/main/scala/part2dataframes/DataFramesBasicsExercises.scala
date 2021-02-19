@@ -18,4 +18,12 @@ object DataFramesBasicsExercises extends App {
   val phonesDF = phones.toDF("Make", "Model", "ScreenSize", "CameraMP")
   phonesDF.printSchema()
 
+
+  val moviesDF = spark.read
+    .format("json")
+    .option("inferSchema", "true")
+    .load("src/main/resources/data/movies.json")
+
+  moviesDF.printSchema()
+  println(s"Movies dataframe has size ${moviesDF.count()}")
 }
