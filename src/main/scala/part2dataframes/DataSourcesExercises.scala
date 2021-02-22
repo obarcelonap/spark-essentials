@@ -2,7 +2,6 @@ package part2dataframes
 
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.types._
-import part2dataframes.DataSources.{carsDF, spark}
 
 object DataSourcesExercises extends App {
 
