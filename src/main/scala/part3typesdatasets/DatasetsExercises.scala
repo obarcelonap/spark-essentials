@@ -1,7 +1,7 @@
 package part3typesdatasets
 
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.sql.functions.avg
+import org.apache.spark.sql.functions.array_contains
 
 object DatasetsExercises extends App {
 
@@ -9,6 +9,10 @@ object DatasetsExercises extends App {
     .appName("Datasets")
     .config("spark.master", "local")
     .getOrCreate()
+
+  def readDF(filename: String) = spark.read
+    .option("inferSchema", "true")
+    .json(s"src/main/resources/data/$filename")
 
   case class Car(
                   Name: String,
@@ -22,9 +26,7 @@ object DatasetsExercises extends App {
                   Origin: String
                 )
 
-  val carsDF = spark.read
-    .option("inferSchema", "true")
-    .json(s"src/main/resources/data/cars.json")
+  val carsDF = readDF("cars.json")
 
   import spark.implicits._
   val carsDS = carsDF.as[Car]
@@ -44,4 +46,15 @@ object DatasetsExercises extends App {
     carsDS.map(_.Horsepower.getOrElse(0L))
       .reduce(_ + _)
   )
+
+  case class Guitar(id: Long, make: String, model: String, guitarType: String)
+  case class GuitarPlayer(id: Long, name: String, guitars: Seq[Long], band: Long)
+  case class Band(id: Long, name: String, hometown: String, year: Long)
+
+  val guitarsDS = readDF("guitars.json").as[Guitar]
+  val guitarPlayersDS = readDF("guitarPlayers.json").as[GuitarPlayer]
+
+  guitarPlayersDS.joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+    .show()
+
 }
